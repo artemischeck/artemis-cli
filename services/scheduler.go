@@ -15,7 +15,7 @@ func ScheduleTasks(files []ServiceFile) error {
 	var scheduleItems []map[string]string
 	for _, file := range files {
 		scheduleItem := make(map[string]string)
-		nextExecutionTime := time.Now().Local().Add(time.Second * time.Duration(60)).String()
+		nextExecutionTime := time.Now().Add(time.Second * time.Duration(60)).String()
 		scheduleItem[file.Name] = nextExecutionTime
 		scheduleItems = append(scheduleItems, scheduleItem)
 	}

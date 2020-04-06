@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
+	"time"
 )
 
 // ExecuteQueue read queue file and execute based on defination
@@ -31,6 +33,17 @@ func ExecuteQueue() error {
 	for _, value := range fileResult {
 		for fileName, scheduleTime := range value {
 			log.Println(fileName, scheduleTime)
+			t, err := time.Parse("2006-01-02 15:04:05", strings.Split(scheduleTime, ".")[0])
+			if err != nil {
+				log.Panic(err)
+			}
+
+			now := time.Now()
+			if now.Hour() == t.Hour() && now.Minute() == t.Minute() {
+				log.Println("Match found at >>>>>>>>> ", t)
+			} else {
+				log.Println("Out of match at", now)
+			}
 		}
 	}
 	// Update the next execution time and save
