@@ -26,7 +26,7 @@ REQUEST POST
 DATA xxx
 
 #Interval between each monitor. Time value in seconds.
-INTERVAL 300
+INTERVAL 60
 
 #Timeout delay. Time value in seconds.
 TIMEOUT 10
