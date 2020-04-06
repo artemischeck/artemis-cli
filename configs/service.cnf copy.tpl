@@ -14,7 +14,7 @@ AUTH_DATA xxxx:yyyy
 CONTENT_TYPE application/json
 
 #Request URL
-URL https://xxx
+URL https://talklift.com
 
 #Service port if not included in URL
 PORT 80
