@@ -100,11 +100,33 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 }
 
 func (file *ServiceFile) sendAPIRequest() (bool, string, error) {
-	body := []byte(file.Data)
-	resp, err := http.Post(file.URL, file.ContentType, bytes.NewBuffer(body))
-	if err != nil {
-		log.Println(err)
+	switch serviceType := file.ServiceType; serviceType {
+	case "REST":
+		if file.Request == "POST" {
+			body := []byte(file.Data)
+			resp, err := http.Post(file.URL, file.ContentType, bytes.NewBuffer(body))
+			if err != nil {
+				log.Println(err)
+			}
+			log.Println(file.URL+" Response: ", resp)
+			return true, "resp", err
+		}
+		resp, err := http.Get(file.URL)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(file.URL+" Response: ", resp)
+		return true, "resp", err
+	case "TELNET":
+		log.Panicln("Perform telnet")
+		return false, "", nil
+	case "SOAP":
+		log.Panicln("Perform SOAP")
+		return false, "", nil
+	case "UTIL":
+		log.Panicln("Perform UTIL i.e trigger command")
+		return false, "", nil
+	default:
+		return false, "", nil
 	}
-	log.Println(file.URL+" Response: ", resp)
-	return true, "resp", err
 }

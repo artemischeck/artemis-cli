@@ -20,7 +20,7 @@ URL https://talklift.com
 PORT 80
 
 #Request type
-REQUEST POST
+REQUEST GET
 
 #Request data
 DATA xxx
