@@ -8,15 +8,15 @@ import (
 	"time"
 )
 
-// HealthCheck schema
+// HealthCheck request schema
 type HealthCheck struct {
-	Service  string
-	Status   bool
-	DateTime time.Time
-	Duration time.Duration
-	Details  string
-	Host     string
-	Tags     string
+	Service  string        `json:"service"`
+	Status   bool          `json:"status"`
+	DateTime time.Time     `json:"date_time"`
+	Duration time.Duration `json:"duration"`
+	Details  string        `json:"details"`
+	Host     string        `json:"host"`
+	Tags     string        `json:"tags"`
 }
 
 func (hlt *HealthCheck) compose(results map[string]string) error {
