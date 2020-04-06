@@ -17,7 +17,7 @@ CONTENT_TYPE application/json
 URL https://xxx
 
 #Service port if not included in URL
-#PORT=[Optional]
+PORT 80
 
 #Request type
 REQUEST POST
@@ -25,8 +25,11 @@ REQUEST POST
 #Request data
 DATA xxx
 
-#Interval between each monitor. Time on seconds.
-INTERVAL=300
+#Interval between each monitor. Time value in seconds.
+INTERVAL 300
+
+#Timeout delay. Time value in seconds.
+TIMEOUT 10
 
 #Local command or script to run for data
 #CMD ./localscript.sh
