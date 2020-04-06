@@ -14,7 +14,8 @@ func main() {
 	if *dir == "" {
 		log.Fatal("Directory is required")
 	}
-	services.Register(*dir)
+	services.ConfigDir = *dir
+	services.Register()
 	log.Println("Started service")
 
 	// Run cron service

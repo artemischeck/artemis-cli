@@ -40,9 +40,7 @@ func ExecuteQueue() error {
 
 			now := time.Now()
 			if now.Hour() == t.Hour() && now.Minute() == t.Minute() {
-				log.Println("Match found at >>>>>>>>> ", t)
-			} else {
-				log.Println("Out of match at", now)
+				go SendRequest(fileName)
 			}
 		}
 	}

@@ -1,7 +1,9 @@
 package services
 
 import (
+	"bytes"
 	"log"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -95,4 +97,14 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	file.Timeout = timeout
 	file.CMD = data["CMD"]
 	file.Tags = tags
+}
+
+func (file *ServiceFile) sendAPIRequest() (bool, string, error) {
+	body := []byte(file.Data)
+	resp, err := http.Post(file.URL, file.ContentType, bytes.NewBuffer(body))
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(file.URL+" Response: ", resp)
+	return true, "resp", err
 }

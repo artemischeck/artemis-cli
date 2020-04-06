@@ -14,7 +14,7 @@ AUTH_DATA xxxx:yyyy
 CONTENT_TYPE application/json
 
 #Request URL
-URL https://xxx
+URL https://google.com
 
 #Service port if not included in URL
 PORT 80
@@ -23,7 +23,7 @@ PORT 80
 REQUEST POST
 
 #Request data
-DATA xxx
+DATA {"hello", "world"}
 
 #Interval between each monitor. Time value in seconds.
 INTERVAL 90

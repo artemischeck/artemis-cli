@@ -11,12 +11,17 @@ import (
 
 const globalConfigName = "healthcheck.ini"
 
+var (
+	// ConfigDir sent config files directory
+	ConfigDir string
+)
+
 //Register opens services file and run based on settings
-func Register(dir string) error {
+func Register() error {
 	var globalConfig os.FileInfo
 	var fileResult map[string]string
 	var serviceFiles []ServiceFile
-	files, err := ioutil.ReadDir(dir)
+	files, err := ioutil.ReadDir(ConfigDir)
 	if err != nil {
 		return err
 	}
@@ -30,18 +35,22 @@ func Register(dir string) error {
 		}
 		// Read service files
 		fileName := file.Name()
-		fileResult, err = readConfigFile(path.Join(dir, fileName))
-		serviceFile := ServiceFile{}
-		serviceFile.readFile(fileName, fileResult)
-		serviceFiles = append(serviceFiles, serviceFile)
+		fileResult, err = ReadConfigFile(path.Join(ConfigDir, fileName))
 		if err != nil {
 			log.Fatal(err)
 		}
+		serviceFile := ServiceFile{}
+		serviceFile.readFile(fileName, fileResult)
+		serviceFiles = append(serviceFiles, serviceFile)
+
 	}
 
 	// Read global config file
 	// log.Println("Config", globalConfig.Name())
-	fileResult, err = readConfigFile(path.Join(dir, globalConfig.Name()))
+	fileResult, err = ReadConfigFile(path.Join(ConfigDir, globalConfig.Name()))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Schedule tasks
 	if len(serviceFiles) > 0 {
@@ -50,7 +59,8 @@ func Register(dir string) error {
 	return nil
 }
 
-func readConfigFile(fileName string) (map[string]string, error) {
+// ReadConfigFile config files
+func ReadConfigFile(fileName string) (map[string]string, error) {
 	results := make(map[string]string)
 	file, err := os.Open(fileName)
 	if err != nil {
