@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"log"
+	"time"
 
 	"./services"
-	"github.com/jasonlvhit/gocron"
 )
 
 func main() {
@@ -18,6 +18,8 @@ func main() {
 	log.Println("Started service")
 
 	// Run cron service
-	gocron.Every(60).Second().Do(services.ExecuteQueue)
-	<-gocron.Start()
+	for 1 == 1 {
+		time.Sleep(60 * time.Second)
+		services.ExecuteQueue()
+	}
 }
