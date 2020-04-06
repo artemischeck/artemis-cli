@@ -18,6 +18,6 @@ func main() {
 	log.Println("Started service")
 
 	// Run cron service
-	gocron.Every(1).Minute().Do(services.ExecuteQueue)
+	gocron.Every(5).Second().Do(services.ExecuteQueue)
 	<-gocron.Start()
 }

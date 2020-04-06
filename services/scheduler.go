@@ -36,7 +36,7 @@ func writeToFile(line []byte) {
 	}
 	defer file.Close()
 
-	len, err := file.Write(line)
+	len, err := file.WriteString(string(line))
 	if err != nil {
 		log.Fatalf("failed writing to file: %s", err)
 	}
