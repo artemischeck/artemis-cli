@@ -14,7 +14,8 @@ const globalConfigName = "healthcheck.ini"
 //Register opens services file and run based on settings
 func Register(dir string) error {
 	var globalConfig os.FileInfo
-	var fileResults map[string]string
+	var fileResult map[string]string
+	var serviceFiles []ServiceFile
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
@@ -29,18 +30,23 @@ func Register(dir string) error {
 		}
 		// Read service files
 		fileName := file.Name()
-		fileResults, err = readConfigFile(path.Join(dir, fileName))
+		fileResult, err = readConfigFile(path.Join(dir, fileName))
 		serviceFile := ServiceFile{}
-		serviceFile.readFile(fileName, fileResults)
-		log.Println(serviceFile)
+		serviceFile.readFile(fileName, fileResult)
+		serviceFiles = append(serviceFiles, serviceFile)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	// Read global config file
-	log.Println("Config", globalConfig.Name())
-	fileResults, err = readConfigFile(path.Join(dir, globalConfig.Name()))
+	// log.Println("Config", globalConfig.Name())
+	fileResult, err = readConfigFile(path.Join(dir, globalConfig.Name()))
+
+	// Schedule tasks
+	if len(serviceFiles) > 0 {
+		ScheduleTasks(serviceFiles)
+	}
 	return nil
 }
 

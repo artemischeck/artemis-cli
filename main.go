@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"./services"
+	"github.com/jasonlvhit/gocron"
 )
 
 func main() {
@@ -17,6 +18,6 @@ func main() {
 	log.Println("Started service")
 
 	// Run cron service
-	// gocron.Every(1).Minute().Do(services.ExecuteQueue)
-	// <-gocron.Start()
+	gocron.Every(1).Minute().Do(services.ExecuteQueue)
+	<-gocron.Start()
 }

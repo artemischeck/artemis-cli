@@ -11,6 +11,7 @@ type HealthCheck struct {
 	Service  string
 	Status   bool
 	DateTime time.Time
+	Duration time.Duration
 	Details  string
 	Host     string
 	Tags     string
@@ -23,6 +24,7 @@ func (hlt *HealthCheck) compose(results map[string]string) error {
 // ServiceFile schema
 type ServiceFile struct {
 	Name        string
+	Label       string
 	ServiceType string
 	AuthType    string
 	AuthData    string
@@ -44,8 +46,8 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	timeout := 10
 	tags := "default"
 
-	if data["NAME"] == "" {
-		log.Panicln("Validation error for file:"+fileName, "Name is required")
+	if data["LABEL"] == "" {
+		log.Panicln("Validation error for file:"+fileName, "LABEL is required")
 	}
 	if data["SERVICE_TYPE"] == "" {
 		log.Panicln("Validation error for file:"+fileName, "SERVICE_TYPE is required")
@@ -65,13 +67,22 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 			log.Panicln("Value error for file:"+fileName, err)
 		}
 	}
+	// Ensure interval is more than 60 seconds
+	if interval < 60 {
+		log.Panicln("Value error for file:"+fileName, "Interval must be more than 60 seconds")
+	}
 	if data["TIMEOUT"] != "" {
 		timeout, err = strconv.Atoi(data["TIMEOUT"])
 		if err != nil {
 			log.Panicln("Value error for file:"+fileName, err)
 		}
 	}
-	file.Name = data["NAME"]
+	if timeout > 300 {
+		log.Panicln("Value error for file:"+fileName, "Timeout value cannot be more than 300 seconds")
+	}
+
+	file.Name = fileName
+	file.Label = data["LABEL"]
 	file.ServiceType = data["SERVICE_TYPE"]
 	file.AuthType = data["AUTH_TYPE"]
 	file.AuthData = data["AUTH_DATA"]
