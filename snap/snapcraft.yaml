@@ -1,0 +1,21 @@
+name: healthcheck
+version: "1.0"
+summary: Monitor any API you use without changing your current code.
+description: |
+  High performance API health check client built on golang
+
+confinement: devmode
+base: core18
+
+parts:
+  healthcheck:
+    plugin: go
+    go-importpath: github.com/felixcheruiyot/healthcheck
+    source: https://github.com/felixcheruiyot/healthcheck
+    source-type: git
+    build-packages:
+      - gcc
+
+apps:
+  healthcheck:
+    command: bin/healthcheck
