@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"path"
@@ -30,8 +31,7 @@ func SendRequest(fileName string) {
 func SendHealthCheck(fileName string, status int, details interface{}) {
 	log.Println("Sending SendHealthCheck")
 	// Read global config file
-	var globalConfig os.FileInfo
-	fileResult, err := ReadConfigFile(path.Join(ConfigDir, globalConfig.Name()))
+	fileResult, err := ReadConfigFile(path.Join(ConfigDir, globalConfigName))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,8 +40,27 @@ func SendHealthCheck(fileName string, status int, details interface{}) {
 	configFile := ConfigFile{}
 	configFile.readFile(fileResult)
 
+	// Compose body request
+	success := true
+	if status != 200 && status != 201 {
+		success = false
+	}
+	host, err := os.Hostname()
+	if err != nil {
+		panic(err)
+	}
+	hlt := HealthCheck{}
+	hlt.Service = fileName
+	hlt.Status = success
+	hlt.Host = host
+
 	// Send config data
-	_, _, err = configFile.sendAPIRequest([]byte("s"))
+	var body []byte
+	body, err = json.Marshal(hlt)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, _, err = configFile.sendAPIRequest(body)
 	if err != nil {
 		log.Fatal(err)
 	}

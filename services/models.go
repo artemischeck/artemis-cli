@@ -20,10 +20,6 @@ type HealthCheck struct {
 	Tags     string        `json:"tags"`
 }
 
-func (hlt *HealthCheck) compose(results map[string]string) error {
-	return nil
-}
-
 // ConfigFile schema definition
 type ConfigFile struct {
 	URL     string
