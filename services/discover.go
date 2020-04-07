@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-const globalConfigName = "healthcheck.ini"
-
 var (
 	// ConfigDir sent config files directory
 	ConfigDir string
@@ -18,7 +16,6 @@ var (
 
 //Register opens services file and run based on settings
 func Register() error {
-	var globalConfig os.FileInfo
 	var fileResult map[string]string
 	var serviceFiles []ServiceFile
 	files, err := ioutil.ReadDir(ConfigDir)
@@ -30,7 +27,6 @@ func Register() error {
 			continue
 		}
 		if file.Name() == globalConfigName {
-			globalConfig = file
 			continue
 		}
 		// Read service files
@@ -43,13 +39,6 @@ func Register() error {
 		serviceFile.readFile(fileName, fileResult)
 		serviceFiles = append(serviceFiles, serviceFile)
 
-	}
-
-	// Read global config file
-	// log.Println("Config", globalConfig.Name())
-	fileResult, err = ReadConfigFile(path.Join(ConfigDir, globalConfig.Name()))
-	if err != nil {
-		log.Fatal(err)
 	}
 
 	// Schedule tasks

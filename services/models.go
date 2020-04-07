@@ -24,6 +24,50 @@ func (hlt *HealthCheck) compose(results map[string]string) error {
 	return nil
 }
 
+// ConfigFile schema definition
+type ConfigFile struct {
+	URL     string
+	Secure  bool
+	Version string
+	Key     string
+}
+
+func (file *ConfigFile) readFile(data map[string]string) {
+	var err error
+	secure := true
+	version := "v1"
+
+	if data["URL"] == "" {
+		log.Panicln("Validation error, config file: URL is required")
+	}
+	if data["SECURE"] != "" {
+		secure, err = strconv.ParseBool(data["SECURE"])
+		if err != nil {
+			log.Panicln("Value error, config file", err)
+		}
+	}
+	if data["VERSION"] == "" {
+		version = data["VERSION"]
+	}
+
+	file.URL = data["URL"]
+	file.Secure = secure
+	file.Version = version
+	file.Key = data["KEY"]
+}
+
+func (file *ConfigFile) sendAPIRequest(body []byte) (int, interface{}, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", file.URL, bytes.NewBuffer(body))
+	req.Header = map[string][]string{"Content-Type": {"application/json"}, "Authorization": {"Token " + file.Key}}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(file.URL+" Response: ", resp)
+	return resp.StatusCode, resp.Body, err
+}
+
 // ServiceFile schema
 type ServiceFile struct {
 	Name        string
