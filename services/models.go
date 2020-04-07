@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -99,34 +100,43 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	file.Tags = tags
 }
 
-func (file *ServiceFile) sendAPIRequest() (bool, string, error) {
+func (file *ServiceFile) sendAPIRequest() (int, interface{}, error) {
 	switch serviceType := file.ServiceType; serviceType {
 	case "REST":
 		if file.Request == "POST" {
+			client := &http.Client{}
 			body := []byte(file.Data)
-			resp, err := http.Post(file.URL, file.ContentType, bytes.NewBuffer(body))
+			req, err := http.NewRequest("POST", file.URL, bytes.NewBuffer(body))
+			if file.AuthType == "BASIC" && file.AuthData != "" {
+				authData := strings.Split(file.AuthData, ":")
+				req.SetBasicAuth(authData[0], authData[1])
+			}
+			if file.ContentType != "" {
+				req.Header = map[string][]string{"Content-Type": {file.ContentType}}
+			}
+			resp, err := client.Do(req)
 			if err != nil {
 				log.Println(err)
 			}
 			log.Println(file.URL+" Response: ", resp)
-			return true, "resp", err
+			return resp.StatusCode, resp.Body, err
 		}
 		resp, err := http.Get(file.URL)
 		if err != nil {
 			log.Println(err)
 		}
 		log.Println(file.URL+" Response: ", resp)
-		return true, "resp", err
+		return resp.StatusCode, resp.Body, err
 	case "TELNET":
 		log.Panicln("Perform telnet")
-		return false, "", nil
+		return 0, "", nil
 	case "SOAP":
 		log.Panicln("Perform SOAP")
-		return false, "", nil
+		return 0, "", nil
 	case "UTIL":
 		log.Panicln("Perform UTIL i.e trigger command")
-		return false, "", nil
+		return 0, "", nil
 	default:
-		return false, "", nil
+		return 0, "", nil
 	}
 }
