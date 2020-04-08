@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"time"
 )
 
 const globalConfigName = "healthcheck.ini"
@@ -53,6 +54,7 @@ func SendHealthCheck(fileName string, status int, details interface{}) {
 	hlt.Service = fileName
 	hlt.Status = success
 	hlt.Host = host
+	hlt.DateTime = time.Now()
 
 	// Send config data
 	var body []byte
@@ -60,6 +62,7 @@ func SendHealthCheck(fileName string, status int, details interface{}) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
 	_, _, err = configFile.sendAPIRequest(body)
 	if err != nil {
 		log.Fatal(err)

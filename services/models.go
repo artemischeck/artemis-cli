@@ -55,7 +55,12 @@ func (file *ConfigFile) readFile(data map[string]string) {
 func (file *ConfigFile) sendAPIRequest(body []byte) (int, interface{}, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", file.URL, bytes.NewBuffer(body))
-	req.Header = map[string][]string{"Content-Type": {"application/json"}, "Authorization": {"Token " + file.Key}}
+	if err != nil {
+		log.Panic(err)
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Token "+file.Key)
+	
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
@@ -152,7 +157,7 @@ func (file *ServiceFile) sendAPIRequest() (int, interface{}, error) {
 				req.SetBasicAuth(authData[0], authData[1])
 			}
 			if file.ContentType != "" {
-				req.Header = map[string][]string{"Content-Type": {file.ContentType}}
+				req.Header.Add("Content-Type", file.ContentType)
 			}
 			resp, err := client.Do(req)
 			if err != nil {
