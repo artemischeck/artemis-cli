@@ -20,7 +20,7 @@ URL https://google.com
 PORT 80
 
 #Request type
-REQUEST POST
+REQUEST GET
 
 #Request data
 DATA {"hello", "world"}

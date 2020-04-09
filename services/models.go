@@ -11,11 +11,11 @@ import (
 
 // HealthCheck request schema
 type HealthCheck struct {
-	Service  string        `json:"service"`
-	Status   bool          `json:"status"`
+	Service  string        `json:"label"`
+	Status   int           `json:"status"`
 	DateTime time.Time     `json:"date_time"`
 	Duration time.Duration `json:"duration"`
-	Details  string        `json:"details"`
+	Details  string        `json:"message"`
 	Host     string        `json:"host"`
 	Tags     string        `json:"tags"`
 }
@@ -60,11 +60,12 @@ func (file *ConfigFile) sendAPIRequest(body []byte) (int, interface{}, error) {
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Token "+file.Key)
-	
+
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
 	}
+	defer resp.Body.Close()
 	log.Println(file.URL+" Response: ", resp)
 	return resp.StatusCode, resp.Body, err
 }
@@ -148,8 +149,13 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 func (file *ServiceFile) sendAPIRequest() (int, interface{}, error) {
 	switch serviceType := file.ServiceType; serviceType {
 	case "REST":
+		tr := &http.Transport{
+			MaxIdleConns:       10,
+			IdleConnTimeout:    5 * time.Second,
+			DisableCompression: true,
+		}
 		if file.Request == "POST" {
-			client := &http.Client{}
+			client := &http.Client{Transport: tr}
 			body := []byte(file.Data)
 			req, err := http.NewRequest("POST", file.URL, bytes.NewBuffer(body))
 			if file.AuthType == "BASIC" && file.AuthData != "" {
@@ -163,6 +169,7 @@ func (file *ServiceFile) sendAPIRequest() (int, interface{}, error) {
 			if err != nil {
 				log.Println(err)
 			}
+			defer resp.Body.Close()
 			log.Println(file.URL+" Response: ", resp)
 			return resp.StatusCode, resp.Body, err
 		}

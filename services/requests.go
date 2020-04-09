@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"time"
@@ -20,16 +21,18 @@ func SendRequest(fileName string) {
 	serviceFile := ServiceFile{}
 	serviceFile.readFile(fileName, fileResult)
 	// 2. Trigger API
+	start := time.Now()
 	var status int
-	var details interface{}
-	status, details, err = serviceFile.sendAPIRequest()
+	status, _, err = serviceFile.sendAPIRequest()
+	duration := time.Since(start)
 
 	// Package response and trigger healthcheck request
-	go SendHealthCheck(fileName, status, details)
+	statusText := http.StatusText(status)
+	go SendHealthCheck(fileName, status, statusText, duration)
 }
 
 // SendHealthCheck health check request
-func SendHealthCheck(fileName string, status int, details interface{}) {
+func SendHealthCheck(fileName string, status int, details string, duration time.Duration) {
 	log.Println("Sending SendHealthCheck")
 	// Read global config file
 	fileResult, err := ReadConfigFile(path.Join(ConfigDir, globalConfigName))
@@ -42,9 +45,9 @@ func SendHealthCheck(fileName string, status int, details interface{}) {
 	configFile.readFile(fileResult)
 
 	// Compose body request
-	success := true
-	if status != 200 && status != 201 {
-		success = false
+	success := 4
+	if status == http.StatusAccepted || status == http.StatusOK || status == http.StatusCreated {
+		success = 1
 	}
 	host, err := os.Hostname()
 	if err != nil {
@@ -55,6 +58,8 @@ func SendHealthCheck(fileName string, status int, details interface{}) {
 	hlt.Status = success
 	hlt.Host = host
 	hlt.DateTime = time.Now()
+	hlt.Details = details
+	hlt.Duration = duration
 
 	// Send config data
 	var body []byte
@@ -62,7 +67,7 @@ func SendHealthCheck(fileName string, status int, details interface{}) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	_, _, err = configFile.sendAPIRequest(body)
 	if err != nil {
 		log.Fatal(err)
