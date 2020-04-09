@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log"
 	"net/http"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -52,7 +53,7 @@ func (file *ConfigFile) readFile(data map[string]string) {
 	file.Key = data["KEY"]
 }
 
-func (file *ConfigFile) sendAPIRequest(body []byte) (int, interface{}, error) {
+func (file *ConfigFile) sendAPIRequest(body []byte) (int, string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", file.URL, bytes.NewBuffer(body))
 	if err != nil {
@@ -67,7 +68,7 @@ func (file *ConfigFile) sendAPIRequest(body []byte) (int, interface{}, error) {
 	}
 	defer resp.Body.Close()
 	log.Println(file.URL+" Response: ", resp)
-	return resp.StatusCode, resp.Body, err
+	return resp.StatusCode, "", err
 }
 
 // ServiceFile schema
@@ -146,7 +147,7 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	file.Tags = tags
 }
 
-func (file *ServiceFile) sendAPIRequest() (int, interface{}, error) {
+func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 	switch serviceType := file.ServiceType; serviceType {
 	case "REST":
 		tr := &http.Transport{
@@ -171,23 +172,31 @@ func (file *ServiceFile) sendAPIRequest() (int, interface{}, error) {
 			}
 			defer resp.Body.Close()
 			log.Println(file.URL+" Response: ", resp)
-			return resp.StatusCode, resp.Body, err
+			return resp.StatusCode, "", err
 		}
 		resp, err := http.Get(file.URL)
 		if err != nil {
 			log.Println(err)
 		}
 		log.Println(file.URL+" Response: ", resp)
-		return resp.StatusCode, resp.Body, err
+		return resp.StatusCode, "", err
 	case "TELNET":
-		log.Panicln("Perform telnet")
+		log.Println("Perform telnet")
 		return 0, "", nil
 	case "SOAP":
-		log.Panicln("Perform SOAP")
+		log.Println("Perform SOAP")
 		return 0, "", nil
-	case "UTIL":
-		log.Panicln("Perform UTIL i.e trigger command")
-		return 0, "", nil
+	case "SCRIPT":
+		log.Println("Perform SCRIPT i.e trigger command")
+		out, err := exec.Command("/bin/sh", file.CMD).Output()
+		if err != nil {
+			log.Println(err)
+			return 0, "Failed to start", err
+		}
+		if string(out) != "" {
+			return http.StatusServiceUnavailable, string(out), nil
+		}
+		return http.StatusOK, "Running", nil
 	default:
 		return 0, "", nil
 	}

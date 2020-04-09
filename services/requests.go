@@ -23,16 +23,18 @@ func SendRequest(fileName string) {
 	// 2. Trigger API
 	start := time.Now()
 	var status int
-	status, _, err = serviceFile.sendAPIRequest()
+	status, statusText, err := serviceFile.sendAPIRequest()
 	duration := time.Since(start)
 
 	// Package response and trigger healthcheck request
-	statusText := http.StatusText(status)
-	go SendHealthCheck(fileName, status, statusText, duration)
+	if serviceFile.ServiceType == "REST" {
+		statusText = http.StatusText(status)
+	}
+	go SendHealthCheck(serviceFile, status, statusText, duration)
 }
 
 // SendHealthCheck health check request
-func SendHealthCheck(fileName string, status int, details string, duration time.Duration) {
+func SendHealthCheck(serviceFile ServiceFile, status int, details string, duration time.Duration) {
 	log.Println("Sending SendHealthCheck")
 	// Read global config file
 	fileResult, err := ReadConfigFile(path.Join(ConfigDir, globalConfigName))
@@ -54,7 +56,7 @@ func SendHealthCheck(fileName string, status int, details string, duration time.
 		panic(err)
 	}
 	hlt := HealthCheck{}
-	hlt.Service = fileName
+	hlt.Service = serviceFile.Label
 	hlt.Status = success
 	hlt.Host = host
 	hlt.DateTime = time.Now()
