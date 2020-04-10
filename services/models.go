@@ -4,19 +4,20 @@ import (
 	"bytes"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
 )
 
-// HealthCheck request schema
-type HealthCheck struct {
-	Service  string        `json:"label"`
+// HealthCheckPayload request schema
+type HealthCheckPayload struct {
+	Label    string        `json:"label"`
 	Status   int           `json:"status"`
 	DateTime time.Time     `json:"date_time"`
 	Duration time.Duration `json:"duration"`
-	Details  string        `json:"message"`
+	Message  string        `json:"message"`
 	Host     string        `json:"host"`
 	Tags     string        `json:"tags"`
 }
@@ -73,20 +74,24 @@ func (file *ConfigFile) sendAPIRequest(body []byte) (int, string, error) {
 
 // ServiceFile schema
 type ServiceFile struct {
-	Name        string
-	Label       string
-	ServiceType string
-	AuthType    string
-	AuthData    string
-	ContentType string
-	URL         string
-	Port        int
-	Request     string
-	Data        string
-	Interval    int
-	Timeout     int
-	CMD         string
-	Tags        string
+	Name            string
+	Label           string
+	ServiceType     string
+	AuthType        string
+	AuthData        string
+	ContentType     string
+	URL             string
+	Port            int
+	Request         string
+	Data            string
+	Interval        int
+	Timeout         int
+	CMD             string
+	UtilServiceName string
+	OSServiceName   string
+	MinThreshold    int
+	MaxThreshold    int
+	Tags            string
 }
 
 func (file *ServiceFile) readFile(fileName string, data map[string]string) {
@@ -94,6 +99,8 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	port := 80
 	interval := 60
 	timeout := 10
+	minThreshold := 0
+	maxThreshold := 0
 	tags := "default"
 
 	if data["LABEL"] == "" {
@@ -113,6 +120,18 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	}
 	if data["INTERVAL"] != "" {
 		interval, err = strconv.Atoi(data["INTERVAL"])
+		if err != nil {
+			log.Panicln("Value error for file:"+fileName, err)
+		}
+	}
+	if data["MAX_THRESHOLD"] != "" {
+		maxThreshold, err = strconv.Atoi(data["MAX_THRESHOLD"])
+		if err != nil {
+			log.Panicln("Value error for file:"+fileName, err)
+		}
+	}
+	if data["MIN_THRESHOLD"] != "" {
+		minThreshold, err = strconv.Atoi(data["MIN_THRESHOLD"])
 		if err != nil {
 			log.Panicln("Value error for file:"+fileName, err)
 		}
@@ -144,6 +163,10 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	file.Interval = interval
 	file.Timeout = timeout
 	file.CMD = data["CMD"]
+	file.UtilServiceName = data["UTIL_SERVICE_NAME"]
+	file.OSServiceName = data["OS_SERVICE_NAME"]
+	file.MaxThreshold = maxThreshold
+	file.MinThreshold = minThreshold
 	file.Tags = tags
 }
 
@@ -188,7 +211,26 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 		return 0, "", nil
 	case "SCRIPT":
 		log.Println("Perform SCRIPT i.e trigger command")
+		if file.CMD == "" {
+			return 0, "CMD Script not found", nil
+		}
 		out, err := exec.Command("/bin/sh", file.CMD).Output()
+		if err != nil {
+			log.Println(err)
+			return 0, "Failed to start", err
+		}
+		if string(out) != "" {
+			return http.StatusServiceUnavailable, string(out), nil
+		}
+		return http.StatusOK, "Running", nil
+	case "PLUGIN":
+		log.Println("Perform PLUGIN i.e trigger command")
+		cmd := exec.Command("/bin/sh", "/home/felix/Projects/apimonitor/healthcheck/src/services/scripts/plugin.sh")
+
+		cmd.Env = append(os.Environ(),
+			"SERVICE_NAME="+file.UtilServiceName,
+		)
+		out, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Println(err)
 			return 0, "Failed to start", err

@@ -35,8 +35,6 @@ func SendRequest(fileName string) {
 
 // SendHealthCheck health check request
 func SendHealthCheck(serviceFile ServiceFile, status int, details string, duration time.Duration) {
-	log.Println("Sending SendHealthCheck")
-	// Read global config file
 	fileResult, err := ReadConfigFile(path.Join(ConfigDir, globalConfigName))
 	if err != nil {
 		log.Fatal(err)
@@ -55,12 +53,12 @@ func SendHealthCheck(serviceFile ServiceFile, status int, details string, durati
 	if err != nil {
 		panic(err)
 	}
-	hlt := HealthCheck{}
-	hlt.Service = serviceFile.Label
+	hlt := HealthCheckPayload{}
+	hlt.Label = serviceFile.Label
 	hlt.Status = success
 	hlt.Host = host
 	hlt.DateTime = time.Now()
-	hlt.Details = details
+	hlt.Message = details
 	hlt.Duration = duration
 
 	// Send config data
@@ -72,6 +70,6 @@ func SendHealthCheck(serviceFile ServiceFile, status int, details string, durati
 
 	_, _, err = configFile.sendAPIRequest(body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }

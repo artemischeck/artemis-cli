@@ -1,0 +1,23 @@
+LABEL REDIS SERVER
+
+SERVICE_TYPE PLUGIN
+
+#Interval between each monitor. Time value in seconds.
+INTERVAL 60
+
+#Timeout delay. Time value in seconds.
+TIMEOUT 10
+
+# Utility service name e.g mysql, apache2, redis, nginx
+UTIL_SERVICE_NAME nginxLABEL NGINX
+
+SERVICE_TYPE PLUGIN
+
+#Interval between each monitor. Time value in seconds.
+INTERVAL 60
+
+#Timeout delay. Time value in seconds.
+TIMEOUT 10
+
+# Utility service name e.g mysql, apache2, redis, nginx
+UTIL_SERVICE_NAME redis

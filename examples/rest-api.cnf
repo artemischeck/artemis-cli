@@ -1,7 +1,7 @@
 LABEL xxx
 
 #Service type
-# Options: REST, SOAP, UTIL, TELNET
+# Options: REST, SOAP, UTIL, SCRIPT, PLUGIN, TELNET
 SERVICE_TYPE REST
 
 #Authentication type
