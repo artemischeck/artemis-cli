@@ -81,6 +81,7 @@ type ServiceFile struct {
 	AuthData        string
 	ContentType     string
 	URL             string
+	Host            string
 	Port            int
 	Request         string
 	Data            string
@@ -205,7 +206,22 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 		return resp.StatusCode, "", err
 	case "TELNET":
 		log.Println("Perform telnet")
-		return 0, "", nil
+		cmd := exec.Command("/bin/sh", "/home/felix/Projects/apimonitor/healthcheck/src/services/scripts/telnet.sh")
+
+		cmd.Env = append(os.Environ(),
+			"HOST="+file.Host,
+			"PORT="+string(file.Port),
+			"TIMEOUT="+string(file.Timeout),
+		)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Println(err)
+			return 0, "Failed to start", err
+		}
+		if string(out) != "" {
+			return http.StatusServiceUnavailable, string(out), nil
+		}
+		return http.StatusOK, "Running", nil
 	case "SOAP":
 		log.Println("Perform SOAP")
 		return 0, "", nil
