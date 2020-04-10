@@ -18,6 +18,7 @@ func ExecuteQueue() error {
 	}
 	defer file.Close()
 	var scheduleItems string
+	var executedFiles []string
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		scheduleItems = scanner.Text()
@@ -40,9 +41,15 @@ func ExecuteQueue() error {
 
 			now := time.Now()
 			if now.Hour() == t.Hour() && now.Minute() == t.Minute() {
+				executedFiles = append(executedFiles, fileName)
 				go SendRequest(fileName)
 			}
 		}
+	}
+
+	// Resecheduled files
+	if len(executedFiles) > 0 {
+		RescheduleFiles(executedFiles)
 	}
 	// Update the next execution time and save
 	return nil

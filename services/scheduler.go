@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"time"
 )
 
@@ -44,4 +45,21 @@ func writeToFile(line []byte) {
 	}
 	fmt.Printf("\nLength: %d bytes", len)
 	fmt.Printf("\nFile Name: %s", file.Name())
+}
+
+// RescheduleFiles collect executed files and put them back to the queue
+func RescheduleFiles(fileNames []string) {
+	var serviceFiles []ServiceFile
+	for _, fileName := range fileNames {
+		fileResult, err := ReadConfigFile(path.Join(ConfigDir, fileName))
+		if err != nil {
+			log.Fatal(err)
+		}
+		serviceFile := ServiceFile{}
+		serviceFile.readFile(fileName, fileResult)
+		serviceFiles = append(serviceFiles, serviceFile)
+	}
+	if len(serviceFiles) > 0 {
+		ScheduleTasks(serviceFiles)
+	}
 }
