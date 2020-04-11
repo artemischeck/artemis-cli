@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -220,11 +220,7 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 		return http.StatusOK, "Running", nil
 	case "PLUGIN":
 		log.Println("Perform PLUGIN i.e trigger command")
-		pluginBashFile, err := filepath.Abs("../scripts/plugin.sh")
-		if err != nil {
-			log.Println(err)
-			return 0, "Could not load plugin script", err
-		}
+		pluginBashFile := path.Join(ConfigDir, "/plugins/default.sh")
 		log.Println("pluginBashFile", pluginBashFile)
 		cmd := exec.Command("/bin/sh", pluginBashFile)
 

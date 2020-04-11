@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const globalConfigName = "healthcheck.ini"
+const globalConfigName = "artemis.ini"
 
 // SendRequest per file defination
 func SendRequest(fileName string) {

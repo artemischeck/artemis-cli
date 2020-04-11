@@ -51,7 +51,7 @@ func writeToFile(line []byte) {
 func RescheduleFiles(fileNames []string) {
 	var serviceFiles []ServiceFile
 	for _, fileName := range fileNames {
-		fileResult, err := ReadConfigFile(path.Join(ConfigDir, fileName))
+		fileResult, err := ReadConfigFile(path.Join(ConfigDir, "conf.d/"+fileName))
 		if err != nil {
 			log.Fatal(err)
 		}
