@@ -9,4 +9,4 @@ INTERVAL 60
 TIMEOUT 10
 
 # Utility service name e.g mysql, apache2, redis, nginx
-UTIL_SERVICE_NAME rabbitmq
+UTIL_SERVICE_NAME rabbit
