@@ -1,4 +1,4 @@
-# API Monitoring Client for Continuum Solution
+# API Monitoring Client for Artemis Health Check
 
 ## Installation
 
