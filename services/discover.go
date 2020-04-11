@@ -18,7 +18,7 @@ var (
 func Register() error {
 	var fileResult map[string]string
 	var serviceFiles []ServiceFile
-	files, err := ioutil.ReadDir(ConfigDir)
+	files, err := ioutil.ReadDir(path.Join(ConfigDir, "conf.d"))
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func Register() error {
 		}
 		// Read service files
 		fileName := file.Name()
-		fileResult, err = ReadConfigFile(path.Join(ConfigDir, "conf.d/"+fileName))
+		fileResult, err = ReadConfigFile(path.Join(ConfigDir, "conf.d", fileName))
 		if err != nil {
 			log.Fatal(err)
 		}

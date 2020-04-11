@@ -14,7 +14,7 @@ const globalConfigName = "artemis.ini"
 // SendRequest per file defination
 func SendRequest(fileName string) {
 	// 1. Readfile
-	fileResult, err := ReadConfigFile(path.Join(ConfigDir, fileName))
+	fileResult, err := ReadConfigFile(path.Join(ConfigDir, "conf.d", fileName))
 	if err != nil {
 		log.Fatal(err)
 	}

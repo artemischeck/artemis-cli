@@ -39,11 +39,10 @@ func writeToFile(line []byte) {
 
 	file.Truncate(0)
 	file.Seek(0, 0)
-	len, err := file.WriteString(string(line))
+	_, err = file.WriteString(string(line))
 	if err != nil {
 		log.Fatalf("failed writing to file: %s", err)
 	}
-	fmt.Printf("\nLength: %d bytes", len)
 	fmt.Printf("\nFile Name: %s", file.Name())
 }
 
@@ -51,7 +50,7 @@ func writeToFile(line []byte) {
 func RescheduleFiles(fileNames []string) {
 	var serviceFiles []ServiceFile
 	for _, fileName := range fileNames {
-		fileResult, err := ReadConfigFile(path.Join(ConfigDir, "conf.d/"+fileName))
+		fileResult, err := ReadConfigFile(path.Join(ConfigDir, "conf.d", fileName))
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -220,8 +220,7 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 		return http.StatusOK, "Running", nil
 	case "PLUGIN":
 		log.Println("Perform PLUGIN i.e trigger command")
-		pluginBashFile := path.Join(ConfigDir, "/plugins/default.sh")
-		log.Println("pluginBashFile", pluginBashFile)
+		pluginBashFile := path.Join(ConfigDir, "plugins", "default.sh")
 		cmd := exec.Command("/bin/sh", pluginBashFile)
 
 		cmd.Env = append(os.Environ(),
