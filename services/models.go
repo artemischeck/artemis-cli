@@ -3,9 +3,11 @@ package services
 import (
 	"bytes"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -55,10 +57,10 @@ func (file *ConfigFile) readFile(data map[string]string) {
 }
 
 func (file *ConfigFile) sendAPIRequest(body []byte) (int, string, error) {
-	client := &http.Client{}
+	client := &http.Client{Timeout: time.Duration(10)}
 	req, err := http.NewRequest("POST", file.URL, bytes.NewBuffer(body))
 	if err != nil {
-		log.Panic(err)
+		return http.StatusServiceUnavailable, "Could not send request", err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Token "+file.Key)
@@ -158,6 +160,7 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	file.AuthData = data["AUTH_DATA"]
 	file.ContentType = data["CONTENT_TYPE"]
 	file.URL = data["URL"]
+	file.Host = data["HOST"]
 	file.Port = port
 	file.Request = data["REQUEST"]
 	file.Data = data["DATA"]
@@ -180,7 +183,7 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 			DisableCompression: true,
 		}
 		if file.Request == "POST" {
-			client := &http.Client{Transport: tr}
+			client := &http.Client{Transport: tr, Timeout: time.Duration(file.Timeout)}
 			body := []byte(file.Data)
 			req, err := http.NewRequest("POST", file.URL, bytes.NewBuffer(body))
 			if file.AuthType == "BASIC" && file.AuthData != "" {
@@ -206,42 +209,24 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 		return resp.StatusCode, "", err
 	case "TELNET":
 		log.Println("Perform telnet")
-		cmd := exec.Command("/bin/sh", "/home/felix/Projects/apimonitor/healthcheck/src/services/scripts/telnet.sh")
-
-		cmd.Env = append(os.Environ(),
-			"HOST="+file.Host,
-			"PORT="+string(file.Port),
-			"TIMEOUT="+string(file.Timeout),
-		)
-		out, err := cmd.CombinedOutput()
+		dialer := net.Dialer{Timeout: time.Duration(file.Timeout)}
+		address := file.Host + ":" + strconv.Itoa(file.Port)
+		conn, err := dialer.Dial("tcp", address)
 		if err != nil {
 			log.Println(err)
-			return 0, "Failed to start", err
+			return 0, "Failed to start:", err
 		}
-		if string(out) != "" {
-			return http.StatusServiceUnavailable, string(out), nil
-		}
-		return http.StatusOK, "Running", nil
-	case "SOAP":
-		log.Println("Perform SOAP")
-		return 0, "", nil
-	case "SCRIPT":
-		log.Println("Perform SCRIPT i.e trigger command")
-		if file.CMD == "" {
-			return 0, "CMD Script not found", nil
-		}
-		out, err := exec.Command("/bin/sh", file.CMD).Output()
-		if err != nil {
-			log.Println(err)
-			return 0, "Failed to start", err
-		}
-		if string(out) != "" {
-			return http.StatusServiceUnavailable, string(out), nil
-		}
+		defer conn.Close()
 		return http.StatusOK, "Running", nil
 	case "PLUGIN":
 		log.Println("Perform PLUGIN i.e trigger command")
-		cmd := exec.Command("/bin/sh", "/home/felix/Projects/apimonitor/healthcheck/src/services/scripts/plugin.sh")
+		pluginBashFile, err := filepath.Abs("../scripts/plugin.sh")
+		if err != nil {
+			log.Println(err)
+			return 0, "Could not load plugin script", err
+		}
+		log.Println("pluginBashFile", pluginBashFile)
+		cmd := exec.Command("/bin/sh", pluginBashFile)
 
 		cmd.Env = append(os.Environ(),
 			"SERVICE_NAME="+file.UtilServiceName,

@@ -1,0 +1,13 @@
+LABEL T24 Dummy Server
+
+SERVICE_TYPE TELNET
+
+#Interval between each monitor. Time value in seconds.
+INTERVAL 60
+
+#Timeout delay. Time value in seconds.
+TIMEOUT 10
+
+HOST 8.8.8.8
+
+PORT 80

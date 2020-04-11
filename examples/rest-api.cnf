@@ -14,7 +14,7 @@ AUTH_DATA xxxx:yyyy
 CONTENT_TYPE application/json
 
 #Request URL
-URL https://google.com
+URL https://googlexxxxxx.com
 
 #Service port if not included in URL
 PORT 80
