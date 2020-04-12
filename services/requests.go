@@ -31,7 +31,7 @@ func SendRequest(fileName string) {
 		statusText = http.StatusText(status)
 	}
 	log.Println(statusText, duration)
-	// go SendHealthCheck(serviceFile, status, statusText, duration)
+	go SendHealthCheck(serviceFile, status, statusText, duration)
 }
 
 // SendHealthCheck health check request

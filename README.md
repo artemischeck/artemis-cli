@@ -98,4 +98,4 @@
     CONTAINER_NAME postgres
 
 
-Check [Examples Folder](examples) for sample setup files.
+Check [Examples folder](examples) for sample setup files.
