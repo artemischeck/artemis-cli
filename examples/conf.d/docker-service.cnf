@@ -1,0 +1,13 @@
+LABEL Docker Container Check
+
+SERVICE_TYPE DOCKER
+
+#Interval between each monitor. Time value in seconds.
+INTERVAL 60
+
+#Timeout delay. Time value in seconds.
+TIMEOUT 10
+
+# Docker container name
+# Consider naming your containers for easy reference e.g docker run --name postgres postgres
+CONTAINER_NAME postgres
