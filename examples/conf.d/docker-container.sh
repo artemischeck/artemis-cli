@@ -9,4 +9,4 @@ INTERVAL 60
 TIMEOUT 10
 
 # Docker container name
-CONTAINER_NAME postgres
+CONTAINER_NAME 5fcb87f04f77

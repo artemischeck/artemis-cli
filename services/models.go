@@ -239,7 +239,7 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 		return http.StatusOK, "Running", nil
 	case "DOCKER":
 		log.Println("Perform DOCKER i.e trigger command")
-		pluginBashFile := path.Join(ConfigDir, "plugins", "default.sh")
+		pluginBashFile := path.Join(ConfigDir, "plugins", "docker.sh")
 		cmd := exec.Command("/bin/sh", pluginBashFile)
 
 		cmd.Env = append(os.Environ(),

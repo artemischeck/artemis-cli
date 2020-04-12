@@ -30,8 +30,8 @@ func SendRequest(fileName string) {
 	if serviceFile.ServiceType == "REST" {
 		statusText = http.StatusText(status)
 	}
-
-	go SendHealthCheck(serviceFile, status, statusText, duration)
+	log.Println(statusText, duration)
+	// go SendHealthCheck(serviceFile, status, statusText, duration)
 }
 
 // SendHealthCheck health check request
