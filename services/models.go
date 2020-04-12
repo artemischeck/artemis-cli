@@ -57,7 +57,7 @@ func (file *ConfigFile) readFile(data map[string]string) {
 }
 
 func (file *ConfigFile) sendAPIRequest(body []byte) (int, string, error) {
-	client := &http.Client{Timeout: time.Duration(10)}
+	client := &http.Client{Timeout: time.Duration(10 * time.Second)}
 	req, err := http.NewRequest("POST", file.URL, bytes.NewBuffer(body))
 	if err != nil {
 		return http.StatusServiceUnavailable, "Could not send request", err
@@ -91,6 +91,7 @@ type ServiceFile struct {
 	Timeout         int
 	CMD             string
 	UtilServiceName string
+	ContainerName   string
 	OSServiceName   string
 	MinThreshold    int
 	MaxThreshold    int
@@ -169,6 +170,7 @@ func (file *ServiceFile) readFile(fileName string, data map[string]string) {
 	file.CMD = data["CMD"]
 	file.UtilServiceName = data["UTIL_SERVICE_NAME"]
 	file.OSServiceName = data["OS_SERVICE_NAME"]
+	file.ContainerName = data["CONTAINER_NAME"]
 	file.MaxThreshold = maxThreshold
 	file.MinThreshold = minThreshold
 	file.Tags = tags
@@ -225,6 +227,23 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 
 		cmd.Env = append(os.Environ(),
 			"SERVICE_NAME="+file.UtilServiceName,
+		)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Println(err)
+			return 0, "Failed to start", err
+		}
+		if string(out) != "" {
+			return http.StatusServiceUnavailable, string(out), nil
+		}
+		return http.StatusOK, "Running", nil
+	case "DOCKER":
+		log.Println("Perform DOCKER i.e trigger command")
+		pluginBashFile := path.Join(ConfigDir, "plugins", "default.sh")
+		cmd := exec.Command("/bin/sh", pluginBashFile)
+
+		cmd.Env = append(os.Environ(),
+			"CONTAINER_NAME="+file.ContainerName,
 		)
 		out, err := cmd.CombinedOutput()
 		if err != nil {
