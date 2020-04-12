@@ -61,6 +61,7 @@ func SendHealthCheck(serviceFile ServiceFile, status int, details string, durati
 	hlt.DateTime = time.Now()
 	hlt.Message = details
 	hlt.Duration = duration
+	hlt.ServiceType = serviceFile.ServiceType
 
 	// Send config data
 	var body []byte

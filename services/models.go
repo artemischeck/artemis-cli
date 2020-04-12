@@ -15,13 +15,14 @@ import (
 
 // HealthCheckPayload request schema
 type HealthCheckPayload struct {
-	Label    string        `json:"label"`
-	Status   int           `json:"status"`
-	DateTime time.Time     `json:"date_time"`
-	Duration time.Duration `json:"duration"`
-	Message  string        `json:"message"`
-	Host     string        `json:"host"`
-	Tags     string        `json:"tags"`
+	Label       string        `json:"label"`
+	Status      int           `json:"status"`
+	DateTime    time.Time     `json:"date_time"`
+	Duration    time.Duration `json:"duration"`
+	Message     string        `json:"message"`
+	Host        string        `json:"host"`
+	Tags        string        `json:"tags"`
+	ServiceType string        `json:"service_type"`
 }
 
 // ConfigFile schema definition
