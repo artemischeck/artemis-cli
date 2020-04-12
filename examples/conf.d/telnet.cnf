@@ -1,4 +1,4 @@
-LABEL T24 Dummy Server
+LABEL Telnet Test Server
 
 SERVICE_TYPE TELNET
 

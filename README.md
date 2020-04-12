@@ -4,15 +4,16 @@
 
 ### Build from source
 
-    git clone https://github.com/felixcheruiyot/healthcheck.git
-    cd healthcheck
+    git clone https://github.com/artemischeck/artemischeck-cli.git
+    cd artemischeck
     export GOPATH=$PWD
     go build main.go
-    mv main healthcheck
+    mv main artemischeck
 
 ### How to run
 
-    healthcheck -dir=PATH_TO_CONFIG_FILES #Check configs file for example
+    #Check examples files for ideas
+    artemischeck -dir=PATH_TO_CONFIG_FILES
 
 ### Monitoring a RESTFul service
 
@@ -49,11 +50,11 @@
     TIMEOUT 10
 
 
-### Monitoring UTIL Services
+### Monitoring Plugin Services e.g Redis, MySQL
 
-    LABEL Redis
+    LABEL Redis Server
 
-    SERVICE_TYPE SCRIPT
+    SERVICE_TYPE PLUGIN
 
     #Interval between each monitor. Time value in seconds.
     INTERVAL 60
@@ -61,15 +62,40 @@
     #Timeout delay. Time value in seconds.
     TIMEOUT 10
 
-    #Local command or script to run for data
-    CMD PATH_TO_PLUGINS_FOLDER/redis.sh
+    # Utility service name e.g mysql, apache2, redis, nginx
+    UTIL_SERVICE_NAME redis
 
-Redis.sh script
+### Telnet Service
 
-    UP=$(pgrep redis | wc -l);
-    if [ "$UP" -ne 1 ];
-    then
-        echo "Redis Server is down";
-    fi
+    LABEL Telnet Test Server
 
-Check [Plugins Folder](configs/plugins) for exaple scripts
+    SERVICE_TYPE TELNET
+
+    #Interval between each monitor. Time value in seconds.
+    INTERVAL 60
+
+    #Timeout delay. Time value in seconds.
+    TIMEOUT 10
+
+    HOST 8.8.8.8
+
+    PORT 80
+
+### Docker Container Monitoring
+
+    LABEL Docker Container Check
+
+    SERVICE_TYPE DOCKER
+
+    #Interval between each monitor. Time value in seconds.
+    INTERVAL 60
+
+    #Timeout delay. Time value in seconds.
+    TIMEOUT 10
+
+    # Docker container name
+    # Consider naming your containers for easy reference e.g docker run --name postgres postgres
+    CONTAINER_NAME postgres
+
+
+Check [Examples Folder](examples) for sample setup files.
