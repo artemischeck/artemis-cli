@@ -18,8 +18,8 @@
 ### Monitoring a RESTFul service
 
     LABEL Service A
-    #Service type
-    # Options: REST, SOAP, UTIL, TELNET
+    
+    #Service type: REST, SOAP, UTIL, TELNET
     SERVICE_TYPE REST
 
     #Authentication type
