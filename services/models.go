@@ -248,7 +248,7 @@ func (file *ServiceFile) sendAPIRequest() (int, string, error) {
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Println(err)
-			return 0, "Failed to start: " + file.ContainerName, err
+			return 0, "Failed to start", err
 		}
 		if string(out) != "" {
 			return http.StatusServiceUnavailable, string(out), nil
